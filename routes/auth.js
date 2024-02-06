@@ -38,7 +38,7 @@ router.get("/google", passport.authenticate("google", ["profile", "email"]));
 
 router.get("/logout", (req, res) => {
   req.logout(() => {
-    console.log("logged out -------------------------------------->");
+    // console.log("logged out -------------------------------------->");
   });
   res.redirect(process.env.CLIENT_URL);
 });

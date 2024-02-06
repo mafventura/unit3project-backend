@@ -7,7 +7,7 @@ import { OAuth2Client } from "google-auth-library";
 import passport from "./passport.js";
 import session from "express-session";
 import { User } from "./schema/userSchema.js";
-// import passportSetup from "./passport.js";
+import { ToDo } from "./schema/ToDosSchema.js";
 import authRoute from "./routes/auth.js";
 
 const client = new OAuth2Client();
@@ -15,15 +15,9 @@ const client = new OAuth2Client();
 const app = express();
 const SECRET = process.env.SECRET;
 
-// app.use(cors())
 app.use(bodyParser.json());
 
 app.use(
-  // cookieSession({
-  //   name: "session",
-  //   keys: ["cyverwolve"],
-  //   maxAge: 24 * 60 * 60 * 100,
-  // })
   session({
     secret: "r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#",
     resave: false,
@@ -47,10 +41,9 @@ app.use("/auth", authRoute);
 
 const port = process.env.PORT || 4000;
 
-
-// app.get("/", (req, res) => {
-//   res.json({ message: "server running - unit 3 project" });
-// });
+app.listen(port, () => {
+  console.log(`listening on port ${port}`);
+});
 
 app.get("/user/login", async (req, res) => {
   const user = await User.find({});
@@ -82,32 +75,64 @@ app.post("/users/add", async (req, res) => {
   }
 });
 
-app.post("/google-auth", async (req, res) => {
-  const { credential, user_id } = req.body;
+app.get("/todos", async (req, res) => {
   try {
-    const ticket = await client.verifyIdToken({
-      idToken: credential,
-      audience: user_id,
-    });
-    const payload = ticket.getPayload();
-    const { email, given_name } = payload;
-
-    let user = await User.findOne({ email });
-    if (!user) {
-      user = await User.create({
-        email,
-        name: given_name,
-        // authSource: 'google'
-      });
+    const userEmail = req.header("user-email");
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      const allTodos = await ToDo.find({ userId: user._id });
+      res.json(allTodos);
+    } else {
+      console.log("Not found");
+      res.status(500).json({ message: "User not found" });
     }
-    user.save();
-    // const token = jwt.sign({ user }, SECRET);
-    res.status(200).json({ payload, token });
   } catch (e) {
-    res.status(400).json({ error: e.message });
+    console.error(e);
   }
 });
 
-app.listen(port, () => {
-  console.log(`listening on port ${port}`);
+app.post("/todos/add", async (req, res) => {
+  console.log(req.header);
+  try {
+    const userEmail = req.header("user-email");
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      const todo = req.body;
+      const newTodo = new ToDo({ todo: todo.todo, completed: todo.completed, userId: user._id });
+      newTodo.save();
+      console.log(newTodo);
+      res.sendStatus(200);
+    } else {
+      console.log("Not found");
+      res.status(500).json({ message: "User not found" });
+    }
+  } catch (e) {
+    console.error(e);
+  }
 });
+
+// app.post("/google-auth", async (req, res) => {
+//   const { credential, user_id } = req.body;
+//   try {
+//     const ticket = await client.verifyIdToken({
+//       idToken: credential,
+//       audience: user_id,
+//     });
+//     const payload = ticket.getPayload();
+//     const { email, given_name } = payload;
+
+//     let user = await User.findOne({ email });
+//     if (!user) {
+//       user = await User.create({
+//         email,
+//         name: given_name,
+//         // authSource: 'google'
+//       });
+//     }
+//     user.save();
+//     // const token = jwt.sign({ user }, SECRET);
+//     res.status(200).json({ payload, token });
+//   } catch (e) {
+//     res.status(400).json({ error: e.message });
+//   }
+// });
