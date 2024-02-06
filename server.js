@@ -9,6 +9,10 @@ import session from "express-session";
 import { User } from "./schema/userSchema.js";
 import { ToDo } from "./schema/ToDosSchema.js";
 import authRoute from "./routes/auth.js";
+import scheduleRoutes from "./routes/scheduleRoutes.js";
+import { Schedule } from "../schema/scheduleSchema.js";
+
+
 
 const client = new OAuth2Client();
 
@@ -38,6 +42,8 @@ app.use(
 );
 
 app.use("/auth", authRoute);
+app.use("/", scheduleRoutes);
+
 
 const port = process.env.PORT || 4000;
 
