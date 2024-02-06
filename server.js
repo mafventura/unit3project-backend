@@ -13,6 +13,7 @@ import scheduleRoutes from "./routes/scheduleRoutes.js";
 import { Schedule } from "../schema/scheduleSchema.js";
 
 
+import { Dailies } from "./schema/DailiesSchema";
 
 const client = new OAuth2Client();
 
@@ -104,7 +105,12 @@ app.post("/todos/add", async (req, res) => {
     const user = await User.findOne({ email: userEmail });
     if (user) {
       const todo = req.body;
-      const newTodo = new ToDo({ todo: todo.todo, completed: todo.completed, userId: user._id });
+      // console.log(req.body);
+      const newTodo = new ToDo({
+        todo: todo.todo,
+        completed: todo.completed,
+        userId: user._id,
+      });
       newTodo.save();
       console.log(newTodo);
       res.sendStatus(200);
@@ -116,6 +122,60 @@ app.post("/todos/add", async (req, res) => {
     console.error(e);
   }
 });
+
+app.delete("/todos/:id", async (req, res) => {
+  try {
+    await ToDo.deleteOne({ _id: req.params.id });
+    console.log("todo deleted----------");
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+app.put('/todos/:id', async (req, res) => {
+  try {
+    const todo = req.body
+    console.log(todo.completed)
+    await ToDo.updateOne({_id: req.params.id}, {todo: todo.todo, completed: todo.completed})
+    res.sendStatus(200)
+    console.log('updated todo------------->')
+  } catch (e) {
+    console.error(e)
+  }
+})
+app.post('/dailies/add', async (req, res) => {
+  try {
+    const userEmail = req.headers.useremail
+    const user = await User.findOne({email: userEmail})
+    const {water, mood, sleep, quote} = req.body
+    if (!water || !mood || !sleep || !quote) {
+    return res.status(500).json ({error: 'all fields required.' })
+  }
+  const newEntry = await Dailies.create({water, mood, sleep, quote, userId: user._id})
+  res.status(200).json(newEntry)
+} catch (e) {
+  console.error(e)
+  res.status(500).json(e) 
+}
+})
+
+app.get('/dailies/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const entries = await Dailies.find({ userId }).sort({ createdAt: 'desc' });
+
+    if (entries.length === 0) {
+      return res.status(404).json({ message: 'No entries found for the user.' });
+    }
+
+    res.status(200).json(entries);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+})
+
 
 // app.post("/google-auth", async (req, res) => {
 //   const { credential, user_id } = req.body;
