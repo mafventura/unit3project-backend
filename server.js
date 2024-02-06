@@ -9,6 +9,7 @@ import session from "express-session";
 import { User } from "./schema/userSchema.js";
 import { ToDo } from "./schema/ToDosSchema.js";
 import authRoute from "./routes/auth.js";
+import { Dailies } from "./schema/DailiesSchema";
 
 const client = new OAuth2Client();
 
@@ -110,6 +111,37 @@ app.post("/todos/add", async (req, res) => {
     console.error(e);
   }
 });
+
+app.post('/dailies/add', async (req, res) => {
+  try {
+    const {water, mood, sleep, quote, userId} = req.body
+    if (!water || !mood || !sleep || !quote || userId) {
+    return res.status(500).json ({error: 'all fields required.' })
+  }
+  const newEntry = await Dailies.create({water, mood, sleep, quote, userId})
+  res.status(200).json(newEntry)
+} catch (e) {
+  console.error(e)
+  res.status(500).json({error}) 
+}
+})
+
+app.get('/api/dailies/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const entries = await Dailies.find({ userId }).sort({ createdAt: 'desc' });
+
+    if (entries.length === 0) {
+      return res.status(404).json({ message: 'No entries found for the user.' });
+    }
+
+    res.status(200).json(entries);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+})
+
 
 // app.post("/google-auth", async (req, res) => {
 //   const { credential, user_id } = req.body;
