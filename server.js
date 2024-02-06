@@ -114,19 +114,21 @@ app.post("/todos/add", async (req, res) => {
 
 app.post('/dailies/add', async (req, res) => {
   try {
-    const {water, mood, sleep, quote, userId} = req.body
-    if (!water || !mood || !sleep || !quote || userId) {
+    const userEmail = req.headers.useremail
+    const user = await User.findOne({email: userEmail})
+    const {water, mood, sleep, quote} = req.body
+    if (!water || !mood || !sleep || !quote) {
     return res.status(500).json ({error: 'all fields required.' })
   }
-  const newEntry = await Dailies.create({water, mood, sleep, quote, userId})
+  const newEntry = await Dailies.create({water, mood, sleep, quote, userId: user._id})
   res.status(200).json(newEntry)
 } catch (e) {
   console.error(e)
-  res.status(500).json({error}) 
+  res.status(500).json(e) 
 }
 })
 
-app.get('/api/dailies/:userId', async (req, res) => {
+app.get('/dailies/:userId', async (req, res) => {
   try {
     const userId = req.params.userId;
     const entries = await Dailies.find({ userId }).sort({ createdAt: 'desc' });
