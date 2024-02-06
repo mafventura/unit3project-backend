@@ -98,7 +98,12 @@ app.post("/todos/add", async (req, res) => {
     const user = await User.findOne({ email: userEmail });
     if (user) {
       const todo = req.body;
-      const newTodo = new ToDo({ todo: todo.todo, completed: todo.completed, userId: user._id });
+      // console.log(req.body);
+      const newTodo = new ToDo({
+        todo: todo.todo,
+        completed: todo.completed,
+        userId: user._id,
+      });
       newTodo.save();
       console.log(newTodo);
       res.sendStatus(200);
@@ -111,28 +116,24 @@ app.post("/todos/add", async (req, res) => {
   }
 });
 
-// app.post("/google-auth", async (req, res) => {
-//   const { credential, user_id } = req.body;
-//   try {
-//     const ticket = await client.verifyIdToken({
-//       idToken: credential,
-//       audience: user_id,
-//     });
-//     const payload = ticket.getPayload();
-//     const { email, given_name } = payload;
+app.delete("/todos/:id", async (req, res) => {
+  try {
+    await ToDo.deleteOne({ _id: req.params.id });
+    console.log("todo deleted----------");
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+  }
+});
 
-//     let user = await User.findOne({ email });
-//     if (!user) {
-//       user = await User.create({
-//         email,
-//         name: given_name,
-//         // authSource: 'google'
-//       });
-//     }
-//     user.save();
-//     // const token = jwt.sign({ user }, SECRET);
-//     res.status(200).json({ payload, token });
-//   } catch (e) {
-//     res.status(400).json({ error: e.message });
-//   }
-// });
+app.put('/todos/:id', async (req, res) => {
+  try {
+    const todo = req.body
+    console.log(todo.completed)
+    await ToDo.updateOne({_id: req.params.id}, {todo: todo.todo, completed: todo.completed})
+    res.sendStatus(200)
+    console.log('updated todo------------->')
+  } catch (e) {
+    console.error(e)
+  }
+})

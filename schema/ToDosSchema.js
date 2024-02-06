@@ -9,7 +9,7 @@ const toDoSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
-});
+}, { timestamps: true });
 
 export const ToDo = mongoose.model("ToDo", toDoSchema);
 
