@@ -99,7 +99,12 @@ app.post("/todos/add", async (req, res) => {
     const user = await User.findOne({ email: userEmail });
     if (user) {
       const todo = req.body;
-      const newTodo = new ToDo({ todo: todo.todo, completed: todo.completed, userId: user._id });
+      // console.log(req.body);
+      const newTodo = new ToDo({
+        todo: todo.todo,
+        completed: todo.completed,
+        userId: user._id,
+      });
       newTodo.save();
       console.log(newTodo);
       res.sendStatus(200);
@@ -112,6 +117,27 @@ app.post("/todos/add", async (req, res) => {
   }
 });
 
+app.delete("/todos/:id", async (req, res) => {
+  try {
+    await ToDo.deleteOne({ _id: req.params.id });
+    console.log("todo deleted----------");
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+  }
+});
+
+app.put('/todos/:id', async (req, res) => {
+  try {
+    const todo = req.body
+    console.log(todo.completed)
+    await ToDo.updateOne({_id: req.params.id}, {todo: todo.todo, completed: todo.completed})
+    res.sendStatus(200)
+    console.log('updated todo------------->')
+  } catch (e) {
+    console.error(e)
+  }
+})
 app.post('/dailies/add', async (req, res) => {
   try {
     const userEmail = req.headers.useremail
