@@ -16,7 +16,7 @@ import { Dailies } from "./schema/DailiesSchema.js";
 
 const client = new OAuth2Client();
 
-const app = express();
+const api = express();
 const SECRET = process.env.SECRET;
 
 app.use(bodyParser.json());
@@ -93,7 +93,6 @@ app.get("/todos", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
-    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -109,9 +108,8 @@ app.post("/todos/add", async (req, res) => {
         todo: todo.todo,
         completed: todo.completed,
         userId: user._id,
-        date: todo.date 
       });
-      await newTodo.save();
+      newTodo.save();
       console.log(newTodo);
       res.sendStatus(200);
     } else {
@@ -120,7 +118,6 @@ app.post("/todos/add", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
-    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -140,20 +137,14 @@ app.put("/todos/:id", async (req, res) => {
     console.log(todo.completed);
     await ToDo.updateOne(
       { _id: req.params.id },
-      { 
-        todo: todo.todo, 
-        completed: todo.completed, 
-        data: todo.date 
-      }
+      { todo: todo.todo, completed: todo.completed }
     );
     res.sendStatus(200);
     console.log("updated todo------------->");
   } catch (e) {
     console.error(e);
-    res.status(500).json({ message: "Internal server error" });
   }
 });
-
 app.post("/dailies/add", async (req, res) => {
   try {
     const userEmail = req.headers.useremail;
