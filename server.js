@@ -8,9 +8,8 @@ import passport from "./passport.js";
 import session from "express-session";
 import { User } from "./schema/userSchema.js";
 import { ToDo } from "./schema/ToDosSchema.js";
+import { Schedule } from './schema/scheduleSchema.js'
 import authRoute from "./routes/auth.js";
-// import scheduleRoutes from "./routes/scheduleRoutes.js";
-// import { Schedule } from "../schema/scheduleSchema.js";
 
 
 import { Dailies } from "./schema/DailiesSchema.js";
@@ -43,7 +42,6 @@ app.use(
 );
 
 app.use("/auth", authRoute);
-// app.use("/", scheduleRoutes);
 
 
 const port = process.env.PORT || 4000;
@@ -194,7 +192,47 @@ app.get("/dailies/:userId", async (req, res) => {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+})
+
+app.get("/schedules", async (req, res) => {
+  try {
+    const userEmail = req.header("user-email");
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      const allSchedule = await Schedule.find({ userId: user._id });
+      res.json(allSchedule);
+    } else {
+      console.log("Not found");
+      res.status(500).json({ message: "User not found" });
+    }
+  } catch (e) {
+    console.error(e);
+  }
 });
+
+app.post("/schedules/add", async (req, res) => {
+  try {
+    const userEmail = req.header("user-email");
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      const schedule = req.body;
+      const newSchedule = new Schedule({
+        date: schedule.date,
+        time: schedule.time,
+        userId: user._id,
+      });
+      newSchedule.save();
+      console.log(newSchedule);
+      res.sendStatus(200);
+    } else {
+      console.log("Not found");
+      res.status(500).json({ message: "User not found" });
+    }
+  } catch (e) {
+    console.error(e);
+  }
+});
+
 
 // app.post("/google-auth", async (req, res) => {
 //   const { credential, user_id } = req.body;
