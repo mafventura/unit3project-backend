@@ -176,18 +176,20 @@ app.post("/dailies/add", async (req, res) => {
   }
 });
 
-app.get("/dailies/:userId", async (req, res) => {
+
+app.get('/dailies', async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const entries = await Dailies.find({ userId }).sort({ createdAt: "desc" });
+    const userEmail = req.header("user-email")
+    // const entries = await Dailies.find({ userId }).sort({ createdAt: 'desc' })
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      const allDailies = await Dailies.find({ userId: user._id });
+      res.json(allDailies);
+    } else {
+      console.log("Not found");
+      res.status(500).json({ message: "User not found" });
 
-    if (entries.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No entries found for the user." });
     }
-
-    res.status(200).json(entries);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
