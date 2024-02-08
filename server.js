@@ -196,6 +196,37 @@ app.get('/dailies', async (req, res) => {
   }
 })
 
+app.delete('/dailies/:id', async(req, res) => {
+  try {
+    await Dailies.deleteOne({_id: req.params.id})
+    console.log("<------------daily deleted----------");
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+app.put("/dailies/:id" , async(req, res) => {
+  try {
+    const daily = req.body
+    await Dailies.updateOne(
+      { _id: req.params.id },
+      {
+        water: daily.water,
+        mood: daily.mood,
+        sleep: daily.sleep,
+        quote: daily.quote
+      }
+    )
+    res.sendStatus(200)
+    console.log("<-----------updated daily------------->");
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
 app.get("/schedules", async (req, res) => {
   try {
     const userEmail = req.header("user-email");
