@@ -4,9 +4,9 @@ mongoose.connect(process.env.DATABASE_URL)
 
 const dailiesSchema = new mongoose.Schema({ 
 
-    water: Number, 
+    water: String, 
     mood: String,
-    sleep: Number,
+    sleep: String,
     quote:String,
     userId: {
         type: mongoose.Schema.Types.ObjectId,
