@@ -232,14 +232,15 @@ app.get("/schedules", async (req, res) => {
     const userEmail = req.header("user-email");
     const user = await User.findOne({ email: userEmail });
     if (user) {
-      const allSchedule = await Schedule.find({ userId: user._id });
-      res.json(allSchedule);
+      const allSchedules = await Schedule.find({ userId: user._id });
+      res.json(allSchedules);
     } else {
       console.log("Not found");
       res.status(500).json({ message: "User not found" });
     }
   } catch (e) {
     console.error(e);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -252,9 +253,10 @@ app.post("/schedules/add", async (req, res) => {
       const newSchedule = new Schedule({
         date: schedule.date,
         time: schedule.time,
+        event: schedule.event, 
         userId: user._id,
       });
-      newSchedule.save();
+      await newSchedule.save();
       console.log(newSchedule);
       res.sendStatus(200);
     } else {
@@ -263,6 +265,7 @@ app.post("/schedules/add", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
