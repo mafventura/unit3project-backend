@@ -32,14 +32,10 @@ api.use(passport.initialize());
 api.use(passport.session());
 
 api.use(
-  cors({
-    origin: "http://localhost:3000",
-    methods: "GET,POST,PUT,DELETE",
-    credentials: true,
-  })
+  cors()
 );
 
-api.use("/auth", authRoute);
+api.use("/auth/", authRoute);
 
 const router = Router()
 
