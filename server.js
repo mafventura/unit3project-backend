@@ -269,6 +269,36 @@ app.post("/schedules/add", async (req, res) => {
   }
 });
 
+app.delete('/schedules/:id', async(req, res) => {
+  try {
+    await Schedule.deleteOne({_id: req.params.id})
+    console.log("<------------schedule deleted----------");
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+app.put("/schedules/:id", async (req, res) => {
+  try {
+    const schedule = req.body;
+    await Schedule.updateOne(
+      { _id: req.params.id },
+      { 
+        date: schedule.date, 
+        time: schedule.time, 
+        event: schedule.event 
+      }
+    );
+    res.sendStatus(200);
+    console.log("updated schedule------------->");
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 
 // app.post("/google-auth", async (req, res) => {
 //   const { credential, user_id } = req.body;
