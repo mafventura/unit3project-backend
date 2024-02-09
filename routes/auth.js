@@ -5,7 +5,7 @@ import { findOrCreateUser } from "../utils/user.js";
 const router = Router();
 
 router.get("/login/success", async (req, res) => {
-  if (req.user) {
+  // if (req.user) {
     // console.log(req.user)
     await findOrCreateUser(req.user);
     res.status(200).json({
@@ -13,9 +13,9 @@ router.get("/login/success", async (req, res) => {
       message: "Successfully Logged In",
       user: req.user,
     });
-  } else {
-    res.status(403).json({ error: true, message: "Not Authorized" });
-  }
+  // } else {
+  //   res.status(403).json({ error: true, message: "Not Authorized" });
+  // }
 });
 
 router.get("/login/failed", (req, res) => {
