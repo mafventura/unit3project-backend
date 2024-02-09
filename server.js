@@ -298,30 +298,3 @@ app.put("/schedules/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-
-
-// app.post("/google-auth", async (req, res) => {
-//   const { credential, user_id } = req.body;
-//   try {
-//     const ticket = await client.verifyIdToken({
-//       idToken: credential,
-//       audience: user_id,
-//     });
-//     const payload = ticket.getPayload();
-//     const { email, given_name } = payload;
-
-//     let user = await User.findOne({ email });
-//     if (!user) {
-//       user = await User.create({
-//         email,
-//         name: given_name,
-//         // authSource: 'google'
-//       });
-//     }
-//     user.save();
-//     // const token = jwt.sign({ user }, SECRET);
-//     res.status(200).json({ payload, token });
-//   } catch (e) {
-//     res.status(400).json({ error: e.message });
-//   }
-// });

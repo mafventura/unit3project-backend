@@ -8,15 +8,15 @@ import passport from "./passport.js";
 import session from "express-session";
 import { User } from "./schema/userSchema.js";
 import { ToDo } from "./schema/ToDosSchema.js";
+import { Schedule } from './schema/scheduleSchema.js'
 import authRoute from "./routes/auth.js";
-// import scheduleRoutes from "./routes/scheduleRoutes.js";
-// import { Schedule } from "../schema/scheduleSchema.js";
+
 
 import { Dailies } from "./schema/DailiesSchema.js";
 
 const client = new OAuth2Client();
 
-const api = express();
+const app = express();
 const SECRET = process.env.SECRET;
 
 app.use(bodyParser.json());
@@ -42,7 +42,7 @@ app.use(
 );
 
 app.use("/auth", authRoute);
-// app.use("/", scheduleRoutes);
+
 
 const port = process.env.PORT || 4000;
 
@@ -93,6 +93,7 @@ app.get("/todos", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -108,8 +109,9 @@ app.post("/todos/add", async (req, res) => {
         todo: todo.todo,
         completed: todo.completed,
         userId: user._id,
+        date: todo.date 
       });
-      newTodo.save();
+      await newTodo.save();
       console.log(newTodo);
       res.sendStatus(200);
     } else {
@@ -118,6 +120,7 @@ app.post("/todos/add", async (req, res) => {
     }
   } catch (e) {
     console.error(e);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -137,14 +140,20 @@ app.put("/todos/:id", async (req, res) => {
     console.log(todo.completed);
     await ToDo.updateOne(
       { _id: req.params.id },
-      { todo: todo.todo, completed: todo.completed }
+      { 
+        todo: todo.todo, 
+        completed: todo.completed, 
+        data: todo.date 
+      }
     );
     res.sendStatus(200);
     console.log("updated todo------------->");
   } catch (e) {
     console.error(e);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
+
 app.post("/dailies/add", async (req, res) => {
   try {
     const userEmail = req.headers.useremail;
@@ -167,46 +176,125 @@ app.post("/dailies/add", async (req, res) => {
   }
 });
 
-app.get("/dailies/:userId", async (req, res) => {
+
+app.get('/dailies', async (req, res) => {
   try {
-    const userId = req.params.userId;
-    const entries = await Dailies.find({ userId }).sort({ createdAt: "desc" });
+    const userEmail = req.header("user-email")
+    // const entries = await Dailies.find({ userId }).sort({ createdAt: 'desc' })
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      const allDailies = await Dailies.find({ userId: user._id });
+      res.json(allDailies);
+    } else {
+      console.log("Not found");
+      res.status(500).json({ message: "User not found" });
 
-    if (entries.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No entries found for the user." });
     }
-
-    res.status(200).json(entries);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal Server Error" });
   }
+})
+
+app.delete('/dailies/:id', async(req, res) => {
+  try {
+    await Dailies.deleteOne({_id: req.params.id})
+    console.log("<------------daily deleted----------");
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+app.put("/dailies/:id" , async(req, res) => {
+  try {
+    const daily = req.body
+    await Dailies.updateOne(
+      { _id: req.params.id },
+      {
+        water: daily.water,
+        mood: daily.mood,
+        sleep: daily.sleep,
+        quote: daily.quote
+      }
+    )
+    res.sendStatus(200)
+    console.log("<-----------updated daily------------->");
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+app.get("/schedules", async (req, res) => {
+  try {
+    const userEmail = req.header("user-email");
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      const allSchedules = await Schedule.find({ userId: user._id });
+      res.json(allSchedules);
+    } else {
+      console.log("Not found");
+      res.status(500).json({ message: "User not found" });
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
 });
 
-// app.post("/google-auth", async (req, res) => {
-//   const { credential, user_id } = req.body;
-//   try {
-//     const ticket = await client.verifyIdToken({
-//       idToken: credential,
-//       audience: user_id,
-//     });
-//     const payload = ticket.getPayload();
-//     const { email, given_name } = payload;
+app.post("/schedules/add", async (req, res) => {
+  try {
+    const userEmail = req.header("user-email");
+    const user = await User.findOne({ email: userEmail });
+    if (user) {
+      const schedule = req.body;
+      const newSchedule = new Schedule({
+        date: schedule.date,
+        time: schedule.time,
+        event: schedule.event, 
+        userId: user._id,
+      });
+      await newSchedule.save();
+      console.log(newSchedule);
+      res.sendStatus(200);
+    } else {
+      console.log("Not found");
+      res.status(500).json({ message: "User not found" });
+    }
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
-//     let user = await User.findOne({ email });
-//     if (!user) {
-//       user = await User.create({
-//         email,
-//         name: given_name,
-//         // authSource: 'google'
-//       });
-//     }
-//     user.save();
-//     // const token = jwt.sign({ user }, SECRET);
-//     res.status(200).json({ payload, token });
-//   } catch (e) {
-//     res.status(400).json({ error: e.message });
-//   }
-// });
+app.delete('/schedules/:id', async(req, res) => {
+  try {
+    await Schedule.deleteOne({_id: req.params.id})
+    console.log("<------------schedule deleted----------");
+    res.sendStatus(200);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
+
+app.put("/schedules/:id", async (req, res) => {
+  try {
+    const schedule = req.body;
+    await Schedule.updateOne(
+      { _id: req.params.id },
+      { 
+        date: schedule.date, 
+        time: schedule.time, 
+        event: schedule.event 
+      }
+    );
+    res.sendStatus(200);
+    console.log("updated schedule------------->");
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
