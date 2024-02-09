@@ -2,18 +2,15 @@ import "dotenv/config";
 import express, { Router } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import passport from "./passport.js";
+import passport from "../../passport.js";
 import session from "express-session";
-import { User } from "./schema/userSchema.js";
-import { ToDo } from "./schema/ToDosSchema.js";
-import { Schedule } from './schema/scheduleSchema.js'
-import authRoute from "./routes/auth.js";
+import { User } from "../../schema/userSchema.js";
+import { ToDo } from "../../schema/ToDosSchema.js";
+import { Schedule } from '../../schema/scheduleSchema.js'
+import { Dailies } from "../../schema/DailiesSchema.js";
+import authRoute from "../../routes/auth.js";
 import serverless from "serverless-http"
-
-
-import { Dailies } from "./schema/DailiesSchema.js";
 
 const client = new OAuth2Client();
 
