@@ -1,5 +1,5 @@
 import "dotenv/config";
-import express from "express";
+import express, { Router } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import jwt from "jsonwebtoken";
@@ -10,18 +10,19 @@ import { User } from "./schema/userSchema.js";
 import { ToDo } from "./schema/ToDosSchema.js";
 import { Schedule } from './schema/scheduleSchema.js'
 import authRoute from "./routes/auth.js";
+import serverless from "serverless-http"
 
 
 import { Dailies } from "./schema/DailiesSchema.js";
 
 const client = new OAuth2Client();
 
-const app = express();
+const api = express();
 const SECRET = process.env.SECRET;
 
-app.use(bodyParser.json());
+api.use(bodyParser.json());
 
-app.use(
+api.use(
   session({
     secret: "r8q,+&1LM3)CD*zAGpx1xm{NeQhc;#",
     resave: false,
@@ -30,10 +31,10 @@ app.use(
   })
 );
 
-app.use(passport.initialize());
-app.use(passport.session());
+api.use(passport.initialize());
+api.use(passport.session());
 
-app.use(
+api.use(
   cors({
     origin: "http://localhost:3000",
     methods: "GET,POST,PUT,DELETE",
@@ -41,21 +42,16 @@ app.use(
   })
 );
 
-app.use("/auth", authRoute);
+api.use("/auth", authRoute);
 
+const router = Router()
 
-const port = process.env.PORT || 4000;
-
-app.listen(port, () => {
-  console.log(`listening on port ${port}`);
-});
-
-app.get("/user/login", async (req, res) => {
+router.get("/user/login", async (req, res) => {
   const user = await User.find({});
   res.json(user);
 });
 
-app.post("/users/add", async (req, res) => {
+router.post("/users/add", async (req, res) => {
   const now = new Date();
 
   if ((await User.countDocuments({ userEmail: req.body.userEmail })) === 0) {
@@ -80,7 +76,7 @@ app.post("/users/add", async (req, res) => {
   }
 });
 
-app.get("/todos", async (req, res) => {
+router.get("/todos", async (req, res) => {
   try {
     const userEmail = req.header("user-email");
     const user = await User.findOne({ email: userEmail });
@@ -97,7 +93,7 @@ app.get("/todos", async (req, res) => {
   }
 });
 
-app.post("/todos/add", async (req, res) => {
+router.post("/todos/add", async (req, res) => {
   console.log(req.header);
   try {
     const userEmail = req.header("user-email");
@@ -124,7 +120,7 @@ app.post("/todos/add", async (req, res) => {
   }
 });
 
-app.delete("/todos/:id", async (req, res) => {
+router.delete("/todos/:id", async (req, res) => {
   try {
     await ToDo.deleteOne({ _id: req.params.id });
     console.log("todo deleted----------");
@@ -134,7 +130,7 @@ app.delete("/todos/:id", async (req, res) => {
   }
 });
 
-app.put("/todos/:id", async (req, res) => {
+router.put("/todos/:id", async (req, res) => {
   try {
     const todo = req.body;
     console.log(todo.completed);
@@ -154,7 +150,7 @@ app.put("/todos/:id", async (req, res) => {
   }
 });
 
-app.post("/dailies/add", async (req, res) => {
+router.post("/dailies/add", async (req, res) => {
   try {
     const userEmail = req.headers.useremail;
     const user = await User.findOne({ email: userEmail });
@@ -177,7 +173,7 @@ app.post("/dailies/add", async (req, res) => {
 });
 
 
-app.get('/dailies', async (req, res) => {
+router.get('/dailies', async (req, res) => {
   try {
     const userEmail = req.header("user-email")
     // const entries = await Dailies.find({ userId }).sort({ createdAt: 'desc' })
@@ -196,7 +192,7 @@ app.get('/dailies', async (req, res) => {
   }
 })
 
-app.delete('/dailies/:id', async(req, res) => {
+router.delete('/dailies/:id', async(req, res) => {
   try {
     await Dailies.deleteOne({_id: req.params.id})
     console.log("<------------daily deleted----------");
@@ -207,7 +203,7 @@ app.delete('/dailies/:id', async(req, res) => {
   }
 })
 
-app.put("/dailies/:id" , async(req, res) => {
+router.put("/dailies/:id" , async(req, res) => {
   try {
     const daily = req.body
     await Dailies.updateOne(
@@ -227,7 +223,7 @@ app.put("/dailies/:id" , async(req, res) => {
   }
 })
 
-app.get("/schedules", async (req, res) => {
+router.get("/schedules", async (req, res) => {
   try {
     const userEmail = req.header("user-email");
     const user = await User.findOne({ email: userEmail });
@@ -244,7 +240,7 @@ app.get("/schedules", async (req, res) => {
   }
 });
 
-app.post("/schedules/add", async (req, res) => {
+router.post("/schedules/add", async (req, res) => {
   try {
     const userEmail = req.header("user-email");
     const user = await User.findOne({ email: userEmail });
@@ -269,7 +265,7 @@ app.post("/schedules/add", async (req, res) => {
   }
 });
 
-app.delete('/schedules/:id', async(req, res) => {
+router.delete('/schedules/:id', async(req, res) => {
   try {
     await Schedule.deleteOne({_id: req.params.id})
     console.log("<------------schedule deleted----------");
@@ -280,7 +276,7 @@ app.delete('/schedules/:id', async(req, res) => {
   }
 })
 
-app.put("/schedules/:id", async (req, res) => {
+router.put("/schedules/:id", async (req, res) => {
   try {
     const schedule = req.body;
     await Schedule.updateOne(
@@ -298,3 +294,7 @@ app.put("/schedules/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+api.use("/api/", router)
+
+export const handler = serverless(api)
