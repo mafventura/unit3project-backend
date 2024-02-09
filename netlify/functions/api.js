@@ -32,7 +32,11 @@ api.use(passport.initialize());
 api.use(passport.session());
 
 api.use(
-  cors()
+  cors({
+    origin: "https://journee-frontend.netlify.app",
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+  })
 );
 
 api.use("/auth/", authRoute);
