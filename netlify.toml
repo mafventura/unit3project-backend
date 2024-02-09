@@ -10,7 +10,7 @@
   force = true
   from = "/auth/*"
   status = 200
-  to = "/.netlify/functions/auth/:splat"
+  to = "/.netlify/functions/api/:splat"
 [[headers]]
   # Define which paths this specific [[headers]] block will cover.
   for = "/*"
