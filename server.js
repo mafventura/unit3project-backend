@@ -35,7 +35,7 @@ app.use(passport.session());
 
 app.use(
   cors({
-    origin: "https://unit3project-frontend-production.up.railway.app/",
+    origin: "https://journee-frontend.netlify.app",
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
