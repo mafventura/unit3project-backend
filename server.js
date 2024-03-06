@@ -20,7 +20,7 @@ const app = express();
 const SECRET = process.env.SECRET;
 
 app.use(bodyParser.json());
-app.set("trust proxy", 1)
+app.set("trust proxy", "https://journee-frontend.netlify.app")
 app.use(
   session({
     secret: process.env.CLIENT_SECRET,
