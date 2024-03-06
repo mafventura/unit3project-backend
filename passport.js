@@ -11,7 +11,7 @@ passport.use(
       scope: ["profile", "email"],
     },
     async function (accessToken, refreshToken, profile, callback) {
-      await findOrCreateUser(profile);
+      // await findOrCreateUser(profile);
       callback(null, profile);
     }
   )
