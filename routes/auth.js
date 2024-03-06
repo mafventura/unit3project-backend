@@ -7,6 +7,7 @@ const router = Router();
 router.get("/login/success", async (req, res) => {
   console.log("this one:", req.user)
   if (req.user) {
+    console.log("inside:", req.user)
     await findOrCreateUser(req.user);
     res.status(200).json({
       error: false,
