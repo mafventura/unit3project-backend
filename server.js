@@ -35,7 +35,7 @@ app.use(passport.session());
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "https://unit3project-frontend-production.up.railway.app/",
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
