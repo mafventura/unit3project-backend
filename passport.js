@@ -12,7 +12,7 @@ passport.use(
     },
     async function (accessToken, refreshToken, profile, callback) {
       // await findOrCreateUser(profile);
-      callback(null, profile);
+      done(null, profile);
     }
   )
 );
