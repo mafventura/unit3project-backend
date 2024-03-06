@@ -20,7 +20,7 @@ const app = express();
 const SECRET = process.env.SECRET;
 
 app.use(bodyParser.json());
-
+app.set("trust proxy", 1)
 app.use(
   session({
     secret: process.env.CLIENT_SECRET,
