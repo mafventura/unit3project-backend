@@ -7,7 +7,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: "/auth/google/callback",
+      callbackURL: "https://unit3project-backend-production.up.railway.app/auth/google/callback/",
       scope: ["profile", "email"],
     },
     async function (accessToken, refreshToken, profile, callback) {
