@@ -26,7 +26,11 @@ app.use(
     secret: process.env.CLIENT_SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { maxAge: 60 * 60 * 1000 }, // 1 hour
+    cookie: {
+      maxAge: 60 * 60 * 1000, // 1 hour
+      secure: true,
+      sameSite: "none",
+    },
   })
 );
 
