@@ -20,7 +20,7 @@ const app = express();
 const SECRET = process.env.SECRET;
 
 app.use(bodyParser.json());
-app.set("trust proxy", "https://journee-frontend.netlify.app")
+
 app.use(
   session({
     secret: process.env.CLIENT_SECRET,
@@ -35,7 +35,7 @@ app.use(passport.session());
 
 app.use(
   cors({
-    origin: "https://journee-frontend.netlify.app",
+    origin: "https://journee.site",
     methods: "GET,POST,PUT,DELETE",
     credentials: true,
   })
