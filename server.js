@@ -5,8 +5,8 @@ import bodyParser from "body-parser";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import passport from "./passport.js";
-import session from "express-session";
-// import session from "cookie-session";
+// import session from "express-session";
+import session from "cookie-session";
 import { User } from "./schema/userSchema.js";
 import { ToDo } from "./schema/ToDosSchema.js";
 import { Schedule } from './schema/scheduleSchema.js'
@@ -22,16 +22,31 @@ const SECRET = process.env.SECRET;
 
 app.use(bodyParser.json());
 
+// app.use(
+//   session({
+//     secret: process.env.CLIENT_SECRET,
+//     resave: false,
+//     saveUninitialized: true,
+//     cookie: {
+//       // maxAge: 60 * 60 * 1000, // 1 hour
+//       maxAge: 86400000, // 24 hours session
+//       secure: true,
+//       // sameSite: "none",
+//       sameSite: 'strict',
+      
+//     },
+//   })
+// );
+
 app.use(
   session({
     secret: process.env.CLIENT_SECRET,
     resave: false,
     saveUninitialized: true,
     cookie: {
-      // maxAge: 60 * 60 * 1000, // 1 hour
+      secureProxy: true,
       maxAge: 86400000, // 24 hours session
       secure: true,
-      // sameSite: "none",
       sameSite: 'strict',
       
     },
