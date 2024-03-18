@@ -5,8 +5,8 @@ import bodyParser from "body-parser";
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import passport from "./passport.js";
-// import session from "express-session";
-import session from "cookie-session";
+import session from "express-session";
+// import session from "cookie-session";
 import { User } from "./schema/userSchema.js";
 import { ToDo } from "./schema/ToDosSchema.js";
 import { Schedule } from './schema/scheduleSchema.js'
