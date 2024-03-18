@@ -27,9 +27,12 @@ app.use(
     resave: false,
     saveUninitialized: true,
     cookie: {
-      maxAge: 60 * 60 * 1000, // 1 hour
+      // maxAge: 60 * 60 * 1000, // 1 hour
+      maxAge: 86400000, // 24 hours session
       secure: true,
-      sameSite: "none",
+      // sameSite: "none",
+      sameSite: 'strict',
+      
     },
   })
 );
